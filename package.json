@@ -25,7 +25,11 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "*://*/*"
+    ],
+    "permissions": [
+      "declarativeNetRequest",
+      "storage"
     ]
   }
 }
