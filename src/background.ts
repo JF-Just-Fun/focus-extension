@@ -1,6 +1,7 @@
+import initial from "./helper/initial"
 import { addRules, getRules, removeRules } from "./utils/rules"
 
-console.log("this is background sw")
+initial()
 
 const handleUpdateRules = async (addList: string[], removeList: number[]) => {
   try {

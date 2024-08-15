@@ -12,9 +12,7 @@ type TValues = {
 }
 
 export const getStorage = async <T extends TKeys>(key: T) => {
-  const v = (await chrome.storage.local.get(key)) as Promise<{
-    [key in T]: TValues[key]
-  }>
+  const v = (await chrome.storage.local.get(key))[key] as Promise<TValues[T]>
   console.log("=> get storage: ", v)
   return v
 }

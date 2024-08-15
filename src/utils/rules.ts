@@ -1,11 +1,11 @@
-import { getStorage } from "./storage"
+import { getStorage, setStorage } from "./storage"
 
 export const addRules = async (urls: string[]) => {
   const id = await getStorage("current-id")
   console.log("=> id", id)
   const ruleAdd = urls.map((url, index) => {
     return {
-      id: 2,
+      id: id + index,
       priority: 10,
       action: { type: chrome.declarativeNetRequest.RuleActionType.BLOCK },
       condition: {
@@ -14,6 +14,8 @@ export const addRules = async (urls: string[]) => {
       }
     } satisfies chrome.declarativeNetRequest.Rule
   })
+
+  setStorage("current-id", id + ruleAdd.length)
 
   try {
     await chrome.declarativeNetRequest.updateDynamicRules({
