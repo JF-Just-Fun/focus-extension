@@ -1,17 +1,19 @@
-import initial from "./helper/initial"
-import { addRules, getRules, removeRules } from "./utils/rules"
+import initial from "./helper/initial";
+import { addRules, getRules, removeRules } from "./helper/rules";
 
-initial()
+initial();
 
 const handleUpdateRules = async (addList: string[], removeList: number[]) => {
+  console.log("=> handleUpdateRules", addList, removeList);
+
   try {
-    if (addList.length) await addRules(addList)
-    if (removeList.length) await removeRules(removeList)
+    if (addList?.length) await addRules(addList);
+    if (removeList?.length) await removeRules(removeList);
   } catch {
-    return false
+    return false;
   }
-  return true
-}
+  return true;
+};
 
 const handleSetRulesAlarm = async (
   id: number,
@@ -20,32 +22,32 @@ const handleSetRulesAlarm = async (
   chrome.alarms.create("demo-default-alarm", {
     delayInMinutes: 1,
     periodInMinutes: 1
-  })
-}
+  });
+};
 
 export enum ActionType {
   UPDATE_RULES = "update_rules",
   GET_RULES = "get_rules",
-  SET_RULES_ALARM = "set_rules_alarm"
+  SET_RULES_ALARM = "set_rules_alarm",
 }
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   switch (message.action) {
     case ActionType.UPDATE_RULES:
-      const { addList, removeList } = message
-      const res = await handleUpdateRules(addList, removeList)
-      sendResponse({ success: res })
-      break
+      const { addList, removeList } = message;
+      const res = await handleUpdateRules(addList, removeList);
+      sendResponse({ success: res });
+      break;
     case ActionType.GET_RULES:
-      const rules = await getRules()
-      sendResponse({ rules })
-      break
+      const rules = await getRules();
+      sendResponse({ rules });
+      break;
     case ActionType.SET_RULES_ALARM:
-      const { id, range } = message
-      await handleSetRulesAlarm(id, range)
-      sendResponse({ success: true })
-      break
+      const { id, range } = message;
+      await handleSetRulesAlarm(id, range);
+      sendResponse({ success: true });
+      break;
     default:
-      break
+      break;
   }
-})
+});

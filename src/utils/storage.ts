@@ -4,6 +4,7 @@ type TValues = {
   "current-id": number
   "net-rules": Array<{
     id: number
+    enabled: boolean
     url: string
     start: number
     end: number
