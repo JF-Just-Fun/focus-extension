@@ -1,11 +1,14 @@
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
-import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
+
+import { clearParams, getUrlParams, paramsToObject } from "~utils/url";
 
 import { ActionType } from "./background";
 
 const styleElement = document.createElement("style");
+window.document.body.appendChild(styleElement);
 
 const styleCache = createCache({
   key: "plasmo-mui-cache",
@@ -13,14 +16,17 @@ const styleCache = createCache({
   container: styleElement
 });
 
-export const getStyle = () => styleElement;
-
 function OptionsIndex() {
   const [data, setData] = useState("");
   const [rules, setRules] = useState<number[]>([]);
 
   useEffect(() => {
     handleGetRules();
+    const params = paramsToObject(window.location.search);
+    if (params.url) {
+      handleAdd(params.url);
+    }
+    clearParams();
   }, []);
 
   const handleGetRules = () => {
@@ -73,6 +79,8 @@ function OptionsIndex() {
         <input onChange={(e) => setData(e.target.value)} value={data} />
         <button onClick={() => handleAdd(data)}>add domain</button>
 
+        <TextField id="standard-basic" label="Standard" variant="standard" />
+
         <div>
           <ul>
             {rules.map((item) => (
@@ -88,7 +96,6 @@ function OptionsIndex() {
           </ul>
         </div>
       </div>
-      <Button>mybtn</Button>
     </CacheProvider>
   );
 }

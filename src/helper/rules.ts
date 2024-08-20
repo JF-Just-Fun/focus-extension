@@ -1,12 +1,17 @@
-import { getDomain, getUrl } from "~utils/url";
+import {
+  getDomain,
+  getUrl,
+  isHttpPage,
+  openOptionsPageWithParams
+} from "~utils/url";
 
 import { getStorage, setStorage } from "../utils/storage";
 
 export const addRules = async (urls: string[]) => {
   const id = await getStorage("current-id");
-  console.log("=> id", id);
   const ruleAdd = urls.map((url, index) => {
     const domain = getDomain(url);
+    if (!domain) throw Error("url is not valid");
     const urlFilter = `||${getUrl(url)}*`;
     return {
       id: id + index,
@@ -34,8 +39,8 @@ export const addRules = async (urls: string[]) => {
       addRules: ruleAdd
     });
     return true;
-  } catch (error: unknown) {
-    console.error(error);
+  } catch {
+    console.error(chrome.runtime.lastError);
     return false;
   }
 };
@@ -55,4 +60,33 @@ export const removeRules = async (ids: number[]) => {
 export const getRules = async () => {
   const rules = await chrome.declarativeNetRequest.getDynamicRules();
   return rules;
+};
+
+export const urlMatch = async (url: string) => {
+  const rules = await getRules();
+  return rules.some((rule) => {
+    const regex = new RegExp(
+      rule.condition.urlFilter.replace(/^||/, "").replace(/\/\*$/, ".*")
+    );
+    return regex.test(url);
+  });
+};
+
+export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
+  if (!tab) {
+    const currentTab = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+    tab = currentTab[0];
+  }
+  const httpPage = isHttpPage(tab.url);
+  if (httpPage) {
+    chrome.tabs.update(tab.id, {
+      url: chrome.runtime.getURL("tabs/blocked.html")
+    });
+    openOptionsPageWithParams({
+      url: getUrl(tab.url)
+    });
+  }
 };
