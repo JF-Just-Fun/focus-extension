@@ -1,21 +1,24 @@
 import iconGray from "url:~assets/icon-gray.png";
 import icon from "url:~assets/icon-origin.png";
 
-import initial from "~/helper/initial";
+import initial from "~background/initial";
 import {
   addRules,
   blockThisTab,
   getRules,
   removeRules,
   urlMatch
-} from "~/helper/rules";
+} from "~background/rules";
 import { isHttpPage } from "~utils/url";
+
+import { ActionType } from "./types";
+
+console.log("=> background sw");
 
 initial();
 
 const handleUpdateRules = async (addList: string[], removeList: number[]) => {
   console.log("=> handleUpdateRules", addList, removeList);
-
   try {
     if (addList?.length) await addRules(addList);
     if (removeList?.length) await removeRules(removeList);
@@ -36,19 +39,16 @@ const handleSetRulesAlarm = async (
   });
 };
 
-export enum ActionType {
-  UPDATE_RULES = "update_rules",
-  GET_RULES = "get_rules",
-  SET_RULES_ALARM = "set_rules_alarm",
-  URL_MATCH_RULE = "url_match_rule"
-}
-
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   switch (message.action) {
     case ActionType.UPDATE_RULES:
       const { addList, removeList } = message;
       const res = await handleUpdateRules(addList, removeList);
       sendResponse({ success: res });
+      break;
+    case ActionType.BLOCK_THIS_DOMAIN:
+      const blocked = await blockThisTab();
+      sendResponse({ blocked });
       break;
     case ActionType.GET_RULES:
       const rules = await getRules();
@@ -62,8 +62,12 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     case ActionType.URL_MATCH_RULE:
       const { url } = message;
       const matched = await urlMatch(url);
-      console.log("=> matched", matched);
       sendResponse({ matched });
+      break;
+    case ActionType.REDIRECT_BLOCKED_PAGE:
+      chrome.tabs.update(sender.tab.id, {
+        url: chrome.runtime.getURL("tabs/blocked.html")
+      });
       break;
     default:
       break;
@@ -75,10 +79,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "focus-menu:block-this-domain") blockThisTab(tab);
 });
 
-// 监听插件是否可用
+// popup and icon
 function updateAction(tabId, changeInfo, tab) {
-  console.log("=> tab", tab.url);
-
   if (isHttpPage(tab.url)) {
     chrome.action.setPopup({ tabId: tabId, popup: "popup.html" });
     chrome.action.setIcon({ path: icon });

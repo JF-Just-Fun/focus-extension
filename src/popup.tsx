@@ -2,7 +2,7 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
-import { blockThisTab } from "~helper/rules";
+import { ActionType } from "~background/types";
 
 const color = "#0460cc";
 
@@ -63,12 +63,22 @@ const RippleStep = styled.div`
 `;
 
 function IndexPopup() {
+  const handleClick = async () => {
+    chrome.runtime.sendMessage(
+      {
+        action: ActionType.BLOCK_THIS_DOMAIN
+      },
+      (response) => {
+        if (response.blocked) window.close();
+      }
+    );
+  };
   return (
     <div
       style={{
         padding: 16
       }}>
-      <RippleStep onClick={() => blockThisTab()}>
+      <RippleStep onClick={handleClick}>
         <RemoveCircleOutlineIcon
           style={{ width: "30px", height: "30px", color: color }}
         />

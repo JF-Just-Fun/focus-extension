@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { clearParams, getUrlParams, paramsToObject } from "~utils/url";
 
-import { ActionType } from "./background";
+import { ActionType } from "./background/types";
 
 const styleElement = document.createElement("style");
 window.document.body.appendChild(styleElement);

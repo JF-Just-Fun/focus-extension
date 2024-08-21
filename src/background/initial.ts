@@ -13,8 +13,9 @@ export default function () {
     // create context menu
     chrome.contextMenus.create({
       id: MENU_ID,
-      title: "Block this page",
-      contexts: ["page"]
+      title: "Block this shit",
+      contexts: ["page"],
+      documentUrlPatterns: ["http://*/*", "https://*/*"]
     });
   });
 }

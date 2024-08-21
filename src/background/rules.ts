@@ -18,7 +18,9 @@ export const addRules = async (urls: string[]) => {
       priority: 1,
       action: {
         type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
-        redirect: { url: chrome.runtime.getURL("tabs/blocked.html") }
+        redirect: {
+          extensionPath: "/tabs/blocked.html"
+        }
       },
       condition: {
         urlFilter,
@@ -39,8 +41,8 @@ export const addRules = async (urls: string[]) => {
       addRules: ruleAdd
     });
     return true;
-  } catch {
-    console.error(chrome.runtime.lastError);
+  } catch (error) {
+    console.error(chrome.runtime.lastError, error);
     return false;
   }
 };
@@ -66,7 +68,7 @@ export const urlMatch = async (url: string) => {
   const rules = await getRules();
   return rules.some((rule) => {
     const regex = new RegExp(
-      rule.condition.urlFilter.replace(/^||/, "").replace(/\/\*$/, ".*")
+      rule.condition.urlFilter.replace(/^\|\|/, "").replace(/\/\*$/, ".*")
     );
     return regex.test(url);
   });
@@ -82,11 +84,11 @@ export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
   }
   const httpPage = isHttpPage(tab.url);
   if (httpPage) {
+    await addRules([tab.url]);
     chrome.tabs.update(tab.id, {
       url: chrome.runtime.getURL("tabs/blocked.html")
     });
-    openOptionsPageWithParams({
-      url: getUrl(tab.url)
-    });
+    return true;
   }
+  return false;
 };
