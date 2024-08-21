@@ -1,5 +1,5 @@
-import iconDisabled from "url:~assets/icon-disabled.png";
-import icon from "url:~assets/icon.png";
+import iconGray from "url:~assets/icon-gray.png";
+import icon from "url:~assets/icon-origin.png";
 
 import initial from "~/helper/initial";
 import {
@@ -72,9 +72,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
 // 监听右键菜单点击事件
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "focus-menu:block-this-domain") {
-    blockThisTab(tab);
-  }
+  if (info.menuItemId === "focus-menu:block-this-domain") blockThisTab(tab);
 });
 
 // 监听插件是否可用
@@ -82,16 +80,14 @@ function updateAction(tabId, changeInfo, tab) {
   console.log("=> tab", tab.url);
 
   if (isHttpPage(tab.url)) {
-    // 设置 popup
     chrome.action.setPopup({ tabId: tabId, popup: "popup.html" });
     chrome.action.setIcon({ path: icon });
   } else {
-    // 移除 popup
     chrome.action.setPopup({
       tabId: tabId,
       popup: "tabs/invalidate-popup.html"
     });
-    chrome.action.setIcon({ path: iconDisabled });
+    chrome.action.setIcon({ path: iconGray });
   }
 }
 chrome.tabs.onUpdated.addListener(updateAction);

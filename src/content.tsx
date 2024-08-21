@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { ActionType } from "./background";
 
 export const config: PlasmoCSConfig = {
-  matches: ["<all_urls>"],
+  matches: ["https://*/*", "http://*/*"],
   all_frames: true,
   run_at: "document_start"
 };

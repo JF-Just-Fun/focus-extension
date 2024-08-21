@@ -1,11 +1,8 @@
-import { css, keyframes } from "@emotion/react";
+import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import IconButton from "@mui/material/IconButton";
-import { useState } from "react";
 
 import { blockThisTab } from "~helper/rules";
-import { getUrl, openOptionsPageWithParams } from "~utils/url";
 
 const color = "#0460cc";
 
