@@ -1,6 +1,6 @@
 import type { PlasmoCSConfig } from "plasmo";
 
-import { ActionType } from "../background/types";
+import { ActionType } from "../background/constant";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://*/*", "http://*/*"],

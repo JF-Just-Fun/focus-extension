@@ -1,11 +1,17 @@
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import RemoveCircleOutlineOutlinedIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
+import Checkbox from "@mui/material/Checkbox";
+import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { clearParams, getUrlParams, paramsToObject } from "~utils/url";
 
-import { ActionType } from "./background/types";
+import { ActionType } from "../background/constant";
+import AddDialog, { type AddDialogRef } from "./AddDialog";
 
 const styleElement = document.createElement("style");
 window.document.body.appendChild(styleElement);
@@ -19,6 +25,7 @@ const styleCache = createCache({
 function OptionsIndex() {
   const [data, setData] = useState("");
   const [rules, setRules] = useState<number[]>([]);
+  const dialogRef = useRef<AddDialogRef>(null);
 
   useEffect(() => {
     handleGetRules();
@@ -69,18 +76,28 @@ function OptionsIndex() {
     );
   };
 
+  const handleAddRule = () => {
+    dialogRef.current.open();
+  };
+
   return (
     <CacheProvider value={styleCache}>
+      <AddDialog ref={dialogRef} />
       <div>
-        <h1>
-          Welcome to your <a href="https://www.plasmo.com">Plasmo</a> Extension!
-        </h1>
-        <h2>This is the Option UI page!</h2>
         <input onChange={(e) => setData(e.target.value)} value={data} />
         <button onClick={() => handleAdd(data)}>add domain</button>
 
-        <TextField id="standard-basic" label="Standard" variant="standard" />
+        <IconButton onClick={handleAddRule}>
+          <AddCircleIcon />
+        </IconButton>
 
+        <TextField id="standard-basic" label="Standard" variant="standard" />
+        <Checkbox
+          icon={
+            <RemoveCircleOutlineOutlinedIcon style={{ color: "#616161" }} />
+          }
+          checkedIcon={<RemoveCircleIcon color="primary" />}
+        />
         <div>
           <ul>
             {rules.map((item) => (

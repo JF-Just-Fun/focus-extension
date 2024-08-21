@@ -1,14 +1,13 @@
-import {
-  getDomain,
-  getUrl,
-  isHttpPage,
-  openOptionsPageWithParams
-} from "~utils/url";
+import { Storage } from "@plasmohq/storage";
 
-import { getStorage, setStorage } from "../utils/storage";
+import { getDomain, getUrl, isHttpPage } from "~utils/url";
+
+import { StorageKeys, type TStorage } from "./constant";
 
 export const addRules = async (urls: string[]) => {
-  const id = await getStorage("current-id");
+  const storage = new Storage();
+
+  const id = await storage.get<TStorage[StorageKeys.ID]>(StorageKeys.ID);
   const ruleAdd = urls.map((url, index) => {
     const domain = getDomain(url);
     if (!domain) throw Error("url is not valid");
@@ -34,7 +33,7 @@ export const addRules = async (urls: string[]) => {
     } satisfies chrome.declarativeNetRequest.Rule;
   });
 
-  setStorage("current-id", id + ruleAdd.length);
+  storage.set(StorageKeys.ID, id + ruleAdd.length);
 
   try {
     await chrome.declarativeNetRequest.updateDynamicRules({
@@ -91,4 +90,28 @@ export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
     return true;
   }
   return false;
+};
+
+export const fetchFavicon = async (url: string) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network response was not ok");
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, "text/html");
+
+    // 查找 <link rel="icon"> 或 <link rel="shortcut icon">
+    let link =
+      doc.querySelector("link[rel='icon']") ||
+      doc.querySelector("link[rel='shortcut icon']");
+
+    if (link) {
+      return new URL(link.getAttribute("href"), url).href; // 返回 favicon 的完整 URL
+    } else {
+      throw new Error("No favicon found");
+    }
+  } catch (error) {
+    console.error("=> Failed to fetch favicon:", error);
+    return "";
+  }
 };

@@ -1,13 +1,16 @@
-import { getStorage, setStorage } from "~utils/storage";
+import { Storage } from "@plasmohq/storage";
+
+import { StorageKeys, type TStorage } from "./constant";
 
 export const MENU_ID = "focus-menu:block-this-domain";
 
 export default function () {
+  const storage = new Storage();
+
   chrome.runtime.onInstalled.addListener(async () => {
-    // initial rule id
-    const id = await getStorage("current-id");
+    const id = await storage.get<TStorage[StorageKeys.ID]>(StorageKeys.ID);
     if (!id) {
-      setStorage("current-id", 1);
+      storage.set(StorageKeys.ID, 1);
     }
 
     // create context menu

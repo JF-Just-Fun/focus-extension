@@ -11,7 +11,7 @@ import {
 } from "~background/rules";
 import { isHttpPage } from "~utils/url";
 
-import { ActionType } from "./types";
+import { ActionType } from "./constant";
 
 console.log("=> background sw");
 
