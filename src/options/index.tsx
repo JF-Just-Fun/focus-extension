@@ -12,6 +12,7 @@ import { clearParams, getUrlParams, paramsToObject } from "~utils/url";
 
 import { ActionType } from "../background/constant";
 import AddDialog, { type AddDialogRef } from "./AddDialog";
+import RuleItem from "./RuleItem";
 
 const styleElement = document.createElement("style");
 window.document.body.appendChild(styleElement);
@@ -76,19 +77,21 @@ function OptionsIndex() {
     );
   };
 
-  const handleAddRule = () => {
+  const handleAddRuleModal = () => {
     dialogRef.current.open();
   };
 
   return (
     <CacheProvider value={styleCache}>
-      <AddDialog ref={dialogRef} />
+      <AddDialog ref={dialogRef} addRule={handleAdd} />
       <div>
         <input onChange={(e) => setData(e.target.value)} value={data} />
         <button onClick={() => handleAdd(data)}>add domain</button>
 
-        <IconButton onClick={handleAddRule}>
-          <AddCircleIcon />
+        <IconButton
+          onClick={handleAddRuleModal}
+          style={{ position: "fixed", right: 20, bottom: 20, zIndex: 999 }}>
+          <AddCircleIcon color="primary" fontSize="large" />
         </IconButton>
 
         <TextField id="standard-basic" label="Standard" variant="standard" />
@@ -101,14 +104,15 @@ function OptionsIndex() {
         <div>
           <ul>
             {rules.map((item) => (
-              <li key={item}>
-                {item}&emsp;
-                <span
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleRemove(item)}>
-                  X
-                </span>
-              </li>
+              <RuleItem key={item} id={item} url={item.toString()} />
+              // <li key={item}>
+              //   {item}&emsp;
+              //   <span
+              //     style={{ cursor: "pointer" }}
+              //     onClick={() => handleRemove(item)}>
+              //     X
+              //   </span>
+              // </li>
             ))}
           </ul>
         </div>

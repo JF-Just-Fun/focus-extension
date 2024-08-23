@@ -7,8 +7,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
+import { isHttpPage } from "~utils/url";
+
 interface IProps {
-  show?: boolean;
+  addRule: (url: string) => void;
 }
 
 export type AddDialogRef = {
@@ -18,6 +20,9 @@ export type AddDialogRef = {
 };
 export default forwardRef((props: IProps, ref) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [domain, setDomain] = useState("");
+  const [domainError, setDomainError] = useState(false);
+  const { description } = chrome.runtime.getManifest();
 
   useImperativeHandle(ref, () => ({
     open() {
@@ -31,42 +36,47 @@ export default forwardRef((props: IProps, ref) => {
     }
   }));
 
+  const handleSubmit = () => {
+    setDomainError(false);
+    // 判断domain是不是url
+    if (!isHttpPage(domain)) {
+      setDomainError(true);
+      return;
+    }
+    props.addRule(domain);
+    setIsVisible(false);
+  };
+
+  const handleClose = () => {
+    setDomain("");
+    setDomainError(false);
+    setIsVisible(false);
+  };
+
   return (
-    <Dialog
-      open={isVisible}
-      onClose={() => setIsVisible(false)}
-      PaperProps={{
-        component: "form",
-        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-          event.preventDefault();
-          const formData = new FormData(event.currentTarget);
-          const formJson = Object.fromEntries((formData as any).entries());
-          const email = formJson.email;
-          console.log(email);
-          setIsVisible(false);
-        }
-      }}>
-      <DialogTitle>Subscribe</DialogTitle>
+    <Dialog open={isVisible} onClose={handleClose}>
+      <DialogTitle>New Block</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          To subscribe to this website, please enter your email address here. We
-          will send updates occasionally.
-        </DialogContentText>
+        <DialogContentText>{description}</DialogContentText>
         <TextField
-          autoFocus
           required
-          margin="dense"
-          id="name"
-          name="email"
-          label="Email Address"
-          type="email"
+          label="Domain to disable"
+          id="domain"
+          name="domain"
+          type="text"
           fullWidth
           variant="standard"
+          value={domain}
+          error={domainError}
+          helperText={
+            domainError ? "domain format is protocol://hostname/subpath" : ""
+          }
+          onChange={(e) => setDomain(e.target.value)}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setIsVisible(false)}>Cancel</Button>
-        <Button type="submit">Subscribe</Button>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleSubmit}>Block</Button>
       </DialogActions>
     </Dialog>
   );
