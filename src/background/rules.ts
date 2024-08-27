@@ -2,7 +2,7 @@ import { Storage } from "@plasmohq/storage";
 
 import { getDomain, getUrl, isHttpPage } from "~utils/url";
 
-import { StorageKeys, type TStorage } from "./constant";
+import { StorageKeys, type IRule, type TStorage } from "./constant";
 
 export const addRules = async (urls: string[]) => {
   const storage = new Storage();
@@ -90,28 +90,4 @@ export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
     return true;
   }
   return false;
-};
-
-export const fetchFavicon = async (url: string) => {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Network response was not ok");
-    const text = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, "text/html");
-
-    // 查找 <link rel="icon"> 或 <link rel="shortcut icon">
-    let link =
-      doc.querySelector("link[rel='icon']") ||
-      doc.querySelector("link[rel='shortcut icon']");
-
-    if (link) {
-      return new URL(link.getAttribute("href"), url).href; // 返回 favicon 的完整 URL
-    } else {
-      throw new Error("No favicon found");
-    }
-  } catch (error) {
-    console.error("=> Failed to fetch favicon:", error);
-    return "";
-  }
 };

@@ -8,9 +8,17 @@ import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import { useEffect, useRef, useState } from "react";
 
+import { Storage } from "@plasmohq/storage";
+
+import {
+  ActionType,
+  StorageKeys,
+  type IRule,
+  type TStorage
+} from "~/background/constant";
+import { setRule } from "~background/store";
 import { clearParams, getUrlParams, paramsToObject } from "~utils/url";
 
-import { ActionType } from "../background/constant";
 import AddDialog, { type AddDialogRef } from "./AddDialog";
 import RuleItem from "./RuleItem";
 
@@ -25,54 +33,45 @@ const styleCache = createCache({
 
 function OptionsIndex() {
   const [data, setData] = useState("");
-  const [rules, setRules] = useState<number[]>([]);
+  const [rules, setRules] = useState<TStorage[StorageKeys.RULES]>([]);
   const dialogRef = useRef<AddDialogRef>(null);
+  const storage = new Storage();
 
   useEffect(() => {
-    handleGetRules();
     const params = paramsToObject(window.location.search);
     if (params.url) {
       handleAdd(params.url);
     }
     clearParams();
+
+    getRules();
   }, []);
 
-  const handleGetRules = () => {
+  const getRules = () => {
     chrome.runtime.sendMessage(
       {
-        action: ActionType.GET_RULES
+        action: ActionType.STORAGE_RULES
       },
-      (response: { rules: chrome.declarativeNetRequest.Rule[] }) => {
-        console.log("=> handleGetRules: ", response.rules);
-        setRules(response.rules.map((item) => item.id));
+      (response) => {
+        if (response.storageRules) {
+          setRules(response.storageRules);
+        }
       }
     );
-  };
-
-  const handleRemove = async (id: number) => {
-    const res = await chrome.runtime.sendMessage({
-      action: ActionType.UPDATE_RULES,
-      removeList: [id]
-    });
-
-    if (res.success) {
-      handleGetRules();
-    } else {
-      console.error("=> remove rule error!!!");
-    }
   };
 
   const handleAdd = (url: string) => {
     chrome.runtime.sendMessage(
       {
-        action: ActionType.UPDATE_RULES,
-        addList: [url]
+        action: ActionType.STORAGE_SET_RULES,
+        rule: {
+          url
+        }
       },
       (response) => {
         if (response.success) {
-          handleGetRules();
+          getRules();
         }
-        setData("");
       }
     );
   };
@@ -81,10 +80,16 @@ function OptionsIndex() {
     dialogRef.current.open();
   };
 
+  const handleUpdateRule = async (
+    data: Partial<Omit<IRule, "id">> & Pick<IRule, "id">
+  ) => {
+    await setRule(data);
+    getRules();
+  };
   return (
     <CacheProvider value={styleCache}>
       <AddDialog ref={dialogRef} addRule={handleAdd} />
-      <div>
+      <div style={{ margin: "20px" }}>
         <input onChange={(e) => setData(e.target.value)} value={data} />
         <button onClick={() => handleAdd(data)}>add domain</button>
 
@@ -104,7 +109,7 @@ function OptionsIndex() {
         <div>
           <ul>
             {rules.map((item) => (
-              <RuleItem key={item} id={item} url={item.toString()} />
+              <RuleItem key={item.id} {...item} onChange={handleUpdateRule} />
               // <li key={item}>
               //   {item}&emsp;
               //   <span
