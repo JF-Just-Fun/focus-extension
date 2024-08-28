@@ -69,8 +69,12 @@ export default function () {
           break;
         case ActionType.STORAGE_SET_RULES:
           const { rule } = message;
-          const currentRule = await setRule({ url: rule.url });
-          sendResponse({ success: true });
+          try {
+            const currentRule = await setRule(rule);
+            sendResponse({ rule: currentRule });
+          } catch (error) {
+            sendResponse({ rule: null, message: error?.message });
+          }
           break;
         default:
           break;

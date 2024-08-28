@@ -7,10 +7,12 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
+import type { IRule } from "~background/constant";
+import { fetchDocument } from "~options/document";
 import { isHttpPage } from "~utils/url";
 
 interface IProps {
-  addRule: (url: string) => void;
+  addRule: (rule: Partial<Omit<IRule, "url">> & Pick<IRule, "url">) => void;
 }
 
 export type AddDialogRef = {
@@ -36,14 +38,18 @@ export default forwardRef((props: IProps, ref) => {
     }
   }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setDomainError(false);
     // 判断domain是不是url
     if (!isHttpPage(domain)) {
       setDomainError(true);
       return;
     }
-    props.addRule(domain);
+
+    const { favicon, title } = await fetchDocument(domain);
+    console.log("=> fetchDocument", favicon, title);
+
+    props.addRule({ url: domain, favicon, title });
     setIsVisible(false);
   };
 

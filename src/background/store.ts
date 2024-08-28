@@ -1,6 +1,8 @@
+import { assign, isEqual } from "lodash";
+
 import { Storage } from "@plasmohq/storage";
 
-import { fetchDocument } from "~/utils/document";
+import { getUrl } from "~utils/url";
 
 import { StorageKeys, type IRule, type TStorage } from "./constant";
 
@@ -11,6 +13,46 @@ storage.watch({
     console.log("=> watch", StorageKeys.RULES, c);
   }
 });
+
+const getNewRule = async (
+  originRules: IRule[],
+  index: number,
+  data: Partial<IRule>
+) => {
+  const id = await storage.get<TStorage[StorageKeys.ID]>(StorageKeys.ID);
+  const currentRule =
+    originRules[index] ||
+    ({
+      enabled: true,
+      title: "",
+      favicon: "",
+      start: 0,
+      end: 60 * 60 * 24,
+      weekly: {
+        mon: true,
+        tue: true,
+        wed: true,
+        thu: true,
+        fri: true,
+        sat: true,
+        sun: true
+      },
+      url: data.url,
+      id
+    } satisfies IRule);
+
+  if (!~index) await storage.set(StorageKeys.ID, id + 1);
+
+  const newRule = assign({}, currentRule, data);
+
+  if (newRule.start >= 71400) newRule.start -= 71400;
+  if (newRule.end >= 71400) newRule.end -= 71400;
+
+  if (newRule.start > newRule.end) {
+    [newRule.start, newRule.end] = [newRule.end, newRule.start];
+  }
+  return newRule;
+};
 
 export function getRule(id: number): Promise<IRule | undefined>;
 export function getRule(): Promise<TStorage[StorageKeys.RULES]>;
@@ -28,50 +70,21 @@ export async function getRule(id?: number) {
 
 export const setRule = async (data: Partial<IRule>) => {
   const rules = await getRule();
-  const id = await storage.get<TStorage[StorageKeys.ID]>(StorageKeys.ID);
 
-  let oldRuleIndex = -1;
-  const oldRule = rules?.find((rule, index) => {
-    if (rule.id === data.id) {
-      oldRuleIndex = index;
-      return true;
-    }
-    return false;
-  });
-
-  const documentUrl = data.url || oldRule.url;
-  let originTitle = oldRule.title || data.title || "";
-  let originFavicon = oldRule.favicon || data.favicon || "";
-
-  if (documentUrl) {
-    const { favicon, title } = await fetchDocument(documentUrl);
-    originTitle = title || originTitle;
-    originFavicon = favicon || originFavicon;
+  if (data.url && !getUrl(data.url)) {
+    throw Error("url is invalid");
   }
 
-  const currentRule =
-    oldRule ||
-    ({
-      enabled: true,
-      title: "",
-      favicon: "",
-      start: 0,
-      end: 60 * 60 * 24,
-      weekly: [1, 2, 3, 4, 5, 6, 7],
-      url: data.url,
-      id
-    } satisfies IRule);
+  const index = rules?.findIndex((rule) => rule.id === data.id);
 
-  rules.splice(!~oldRuleIndex ? 0 : oldRuleIndex, !~oldRuleIndex ? 0 : 1, {
-    ...currentRule,
-    ...data,
-    title: originTitle,
-    favicon: originFavicon
-  });
+  const newRule = await getNewRule(rules, index, data);
+
+  if (isEqual(newRule, rules[index])) throw Error("no change");
+
+  rules.splice(!~index ? 0 : index, !~index ? 0 : 1, newRule);
 
   await storage.set(StorageKeys.RULES, rules);
-  if (!~oldRuleIndex) await storage.set(StorageKeys.ID, id + 1);
-  return currentRule;
+  return newRule;
 };
 
 export const removeRule = async (id: number) => {

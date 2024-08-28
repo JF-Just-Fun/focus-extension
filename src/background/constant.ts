@@ -23,7 +23,15 @@ export interface IRule {
   end: number;
   title: string;
   favicon: string;
-  weekly: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+  weekly: {
+    mon: boolean;
+    tue: boolean;
+    wed: boolean;
+    thu: boolean;
+    fri: boolean;
+    sat: boolean;
+    sun: boolean;
+  };
 }
 
 export type TStorage = {

@@ -7,18 +7,18 @@ export async function fetchDocument(url: string) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, "text/html");
 
-    let link =
+    const link =
       doc.querySelector("link[rel='icon']") ||
-      doc.querySelector("link[rel='shortcut icon']");
+      doc.querySelector("link[rel='shortcut icon']") ||
+      doc.querySelector("link[rel='apple-touch-icon']") ||
+      doc.querySelector("link[rel='apple-touch-icon-precomposed']") ||
+      doc.querySelector("link[rel='mask-icon']") ||
+      doc.querySelector("meta[itemprop='image']");
 
-    if (link) {
-      return {
-        favicon: new URL(link.getAttribute("href"), url).href,
-        title: doc.title || ""
-      }; // 返回 favicon 的完整 URL
-    } else {
-      throw new Error("No favicon found");
-    }
+    return {
+      favicon: link ? new URL(link.getAttribute("href"), url)?.href : "",
+      title: doc.title || ""
+    };
   } catch (error) {
     console.error("=> Failed to fetch favicon:", error);
     return {
