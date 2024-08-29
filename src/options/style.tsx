@@ -15,6 +15,7 @@ export const StyledTimePickerContainer = styled("div")`
 
 export const StyledWeeklyContainer = styled("div")`
   margin-top: 10px;
+  width: 100%;
 `;
 
 export const StyledDeleteMark = styled("div")`
@@ -32,7 +33,6 @@ export const StyledDeleteMark = styled("div")`
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  cursor: pointer;
   &::before {
     content: "";
     opacity: 1;

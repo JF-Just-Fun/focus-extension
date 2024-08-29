@@ -86,11 +86,17 @@ function OptionsIndex() {
       <div style={{ margin: "20px" }}>
         <IconButton
           onClick={handleAddRuleModal}
+          size="large"
           style={{ position: "fixed", right: 20, bottom: 20, zIndex: 999 }}>
           <AddCircleIcon color="primary" fontSize="large" />
         </IconButton>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "40px" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "20px"
+          }}>
           {rules.map((item) => (
             <RuleItem key={item.id} {...item} onChange={handleSetRule} />
           ))}

@@ -64,6 +64,7 @@ export default function (props: IProps) {
       sx={{
         position: "relative",
         minWidth: 400,
+        marginBottom: "30px",
         boxSizing: "border-box"
       }}>
       <CardContent
