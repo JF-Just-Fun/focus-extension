@@ -31,6 +31,16 @@ export enum StorageKeys {
   RULES = "net-rules"
 }
 
+export const weekName = [
+  "mon",
+  "tue",
+  "wed",
+  "thu",
+  "fri",
+  "sat",
+  "sun"
+] as const;
+
 export interface IRule {
   id: number;
   enabled: boolean;
@@ -40,13 +50,7 @@ export interface IRule {
   title: string;
   favicon: string;
   weekly: {
-    mon: boolean;
-    tue: boolean;
-    wed: boolean;
-    thu: boolean;
-    fri: boolean;
-    sat: boolean;
-    sun: boolean;
+    [key in (typeof weekName)[number]]: boolean;
   };
 }
 

@@ -5,10 +5,12 @@ import eventListener from "~background/eventListener";
 import initial from "~background/initial";
 import { isHttpPage } from "~utils/url";
 
+import { alarmInit } from "./alarms";
 import { blockThisTab } from "./store";
 
 initial();
 eventListener();
+alarmInit();
 
 // 监听右键菜单点击事件
 chrome.contextMenus.onClicked.addListener((info, tab) => {

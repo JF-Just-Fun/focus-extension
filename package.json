@@ -41,6 +41,7 @@
     "permissions": [
       "declarativeNetRequest",
       "webRequest",
+      "alarms",
       "tabs",
       "storage",
       "activeTab",

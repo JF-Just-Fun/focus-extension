@@ -47,6 +47,10 @@ export const addRules = async (urls: string[]) => {
 };
 
 export const removeRules = async (ids: number[]) => {
+  if (!ids.length) {
+    const allRules = await getRules();
+    ids = allRules.map((item) => item.id);
+  }
   try {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: ids
