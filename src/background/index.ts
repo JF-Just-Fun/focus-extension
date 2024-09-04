@@ -3,8 +3,9 @@ import icon from "url:~assets/icon-origin.png";
 
 import eventListener from "~background/eventListener";
 import initial from "~background/initial";
-import { blockThisTab } from "~background/rules";
 import { isHttpPage } from "~utils/url";
+
+import { blockThisTab } from "./store";
 
 initial();
 eventListener();

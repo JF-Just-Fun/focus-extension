@@ -15,8 +15,9 @@ import {
 } from "~/background/constant";
 import { clearParams, paramsToObject } from "~utils/url";
 
-import AddDialog, { type AddDialogRef } from "./AddDialog";
+import AddDialog, { type TAddDialogRef } from "./AddDialog";
 import RuleItem from "./RuleItem";
+import SnackBar, { type TSnackBarRef } from "./SnackBar";
 import { StyleOptionsHeader } from "./style";
 
 const styleElement = document.createElement("style");
@@ -31,13 +32,14 @@ const styleCache = createCache({
 function OptionsIndex() {
   const [data, setData] = useState("");
   const [rules, setRules] = useState<TStorage[StorageKeys.RULES]>([]);
-  const dialogRef = useRef<AddDialogRef>(null);
+  const dialogRef = useRef<TAddDialogRef>(null);
+  const snackRef = useRef<TSnackBarRef>(null);
   const storage = new Storage();
   const { description } = chrome.runtime.getManifest();
   useEffect(() => {
     const params = paramsToObject(window.location.search);
     if (params.url) {
-      handleSetRule({ url: params.url });
+      handleSetRule({ ...params });
     }
     clearParams();
 
@@ -57,19 +59,35 @@ function OptionsIndex() {
     );
   };
 
-  const handleSetRule = (data: Partial<IRule>) => {
-    console.log("=> handleSetRule", data);
+  const handleDeleteRule = (id: number) => {
+    chrome.runtime.sendMessage(
+      {
+        action: ActionType.STORAGE_REMOVE_RULES,
+        id
+      },
+      (response) => {
+        if (response.rules) {
+          setRules(response.rules);
+          snackRef.current.open("Remove successful!", "success");
+        } else {
+          snackRef.current.open(response.message, "error");
+        }
+      }
+    );
+  };
 
+  const handleSetRule = (data: Partial<IRule>) => {
     chrome.runtime.sendMessage(
       {
         action: ActionType.STORAGE_SET_RULES,
         rule: data
       },
       (response) => {
-        console.log("=> response", response);
-
         if (response.rule) {
           getRules();
+          snackRef.current.open("Operation successful!", "success");
+        } else {
+          snackRef.current.open(response.message, "error");
         }
       }
     );
@@ -82,6 +100,7 @@ function OptionsIndex() {
   return (
     <CacheProvider value={styleCache}>
       <AddDialog ref={dialogRef} addRule={handleSetRule} />
+      <SnackBar ref={snackRef} />
       <StyleOptionsHeader>{description}</StyleOptionsHeader>
       <div style={{ margin: "20px" }}>
         <IconButton
@@ -98,7 +117,12 @@ function OptionsIndex() {
             gap: "20px"
           }}>
           {rules.map((item) => (
-            <RuleItem key={item.id} {...item} onChange={handleSetRule} />
+            <RuleItem
+              key={item.id}
+              {...item}
+              onChange={handleSetRule}
+              onDelete={handleDeleteRule}
+            />
           ))}
         </div>
       </div>

@@ -1,13 +1,13 @@
-import {
-  addRules,
-  blockThisTab,
-  getRules,
-  removeRules,
-  urlMatch
-} from "~background/rules";
+import { addRules, getRules, removeRules, urlMatch } from "~background/rules";
 
-import { ActionType } from "./constant";
-import { getRule, setRule } from "./store";
+import { ActionType, type IActionParams } from "./constant";
+import {
+  blockThisTab,
+  checkRuleUrlExist,
+  getRule,
+  removeRule,
+  setRule
+} from "./store";
 
 const handleUpdateRules = async (addList: string[], removeList: number[]) => {
   console.log("=> handleUpdateRules", addList, removeList);
@@ -67,14 +67,32 @@ export default function () {
           const storageRules = await getRule();
           sendResponse({ storageRules: storageRules });
           break;
+        case ActionType.STORAGE_REMOVE_RULES:
+          const removeMessage =
+            message as IActionParams[ActionType.STORAGE_REMOVE_RULES];
+          try {
+            const restRule = await removeRule(removeMessage.id);
+            sendResponse({ rules: restRule });
+          } catch (error: unknown) {
+            sendResponse({
+              message: error instanceof Error ? error.message : error
+            });
+          }
+          break;
         case ActionType.STORAGE_SET_RULES:
-          const { rule } = message;
+          const { rule } =
+            message as IActionParams[ActionType.STORAGE_SET_RULES];
           try {
             const currentRule = await setRule(rule);
             sendResponse({ rule: currentRule });
-          } catch (error) {
-            sendResponse({ rule: null, message: error?.message });
+          } catch (error: unknown) {
+            sendResponse({
+              message: error instanceof Error ? error.message : error
+            });
           }
+          break;
+        case ActionType.STORAGE_CHECK_RULE_URL_EXIST:
+          sendResponse({ exist: await checkRuleUrlExist(message.url) });
           break;
         default:
           break;

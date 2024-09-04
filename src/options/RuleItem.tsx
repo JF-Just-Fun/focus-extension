@@ -15,11 +15,10 @@ import Checkbox from "@mui/material/Checkbox";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { useState } from "react";
 
 import type { IRule } from "~background/constant";
-import { removeRule } from "~background/store";
 
 import {
   StyledBadge,
@@ -30,14 +29,13 @@ import {
 
 interface IProps extends IRule {
   onChange?: (data: Partial<Omit<IRule, "id">> & Pick<IRule, "id">) => void;
+  onDelete?: (id: number) => void;
 }
 
 export default function (props: IProps) {
-  const [deleted, setDeleted] = useState(false);
   const [domain, setDomain] = useState(props.url);
   const handleDelete = () => {
-    removeRule(props.id);
-    setDeleted(true);
+    props.onDelete(props.id);
   };
 
   const handleChange = (data: Partial<Omit<IRule, "id">>) => {
@@ -56,8 +54,6 @@ export default function (props: IProps) {
     start: getDayjsFromSeconds(props.start),
     end: getDayjsFromSeconds(props.end)
   });
-
-  if (deleted) return null;
 
   return (
     <Card

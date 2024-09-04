@@ -2,7 +2,7 @@ import { assign, isEqual } from "lodash";
 
 import { Storage } from "@plasmohq/storage";
 
-import { getUrl } from "~utils/url";
+import { getUrl, isHttpPage, openOptionsPageWithParams } from "~utils/url";
 
 import { StorageKeys, type IRule, type TStorage } from "./constant";
 
@@ -13,6 +13,8 @@ storage.watch({
     console.log("=> watch", StorageKeys.RULES, c);
   }
 });
+
+const DayEnd = 24 * 60 * 60 - 1;
 
 const getNewRule = async (
   originRules: IRule[],
@@ -27,7 +29,7 @@ const getNewRule = async (
       title: "",
       favicon: "",
       start: 0,
-      end: 60 * 60 * 24,
+      end: DayEnd,
       weekly: {
         mon: true,
         tue: true,
@@ -45,8 +47,8 @@ const getNewRule = async (
 
   const newRule = assign({}, currentRule, data);
 
-  if (newRule.start >= 71400) newRule.start -= 71400;
-  if (newRule.end >= 71400) newRule.end -= 71400;
+  if (newRule.start > DayEnd) newRule.start -= DayEnd;
+  if (newRule.end > DayEnd) newRule.end -= DayEnd;
 
   if (newRule.start > newRule.end) {
     [newRule.start, newRule.end] = [newRule.end, newRule.start];
@@ -71,8 +73,10 @@ export async function getRule(id?: number) {
 export const setRule = async (data: Partial<IRule>) => {
   const rules = await getRule();
 
-  if (data.url && !getUrl(data.url)) {
-    throw Error("url is invalid");
+  if (data.url) {
+    if (!getUrl(data.url)) throw Error("url is invalid");
+    if (await checkRuleUrlExist(data.url, rules))
+      throw Error("Url already exists!");
   }
 
   const index = rules?.findIndex((rule) => rule.id === data.id);
@@ -91,6 +95,33 @@ export const removeRule = async (id: number) => {
   const rules = await getRule();
 
   const otherRules = rules?.filter((rule) => rule.id !== id);
-  await storage.set(StorageKeys.RULES, otherRules);
+  try {
+    await storage.set(StorageKeys.RULES, otherRules);
+  } catch (error: unknown) {
+    if (error instanceof Error) throw error;
+  }
   return otherRules;
+};
+
+export const checkRuleUrlExist = async (url: string, rules?: IRule[]) => {
+  if (!rules) rules = await getRule();
+  return !!~rules.findIndex((rule) => getUrl(rule.url) === getUrl(url));
+};
+
+export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
+  if (!tab) {
+    const currentTab = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+    tab = currentTab[0];
+  }
+  const httpPage = isHttpPage(tab.url);
+  if (httpPage) {
+    openOptionsPageWithParams({
+      url: tab.url,
+      title: tab.title,
+      favicon: tab.favIconUrl
+    });
+  }
 };

@@ -15,7 +15,7 @@ interface IProps {
   addRule: (rule: Partial<Omit<IRule, "url">> & Pick<IRule, "url">) => void;
 }
 
-export type AddDialogRef = {
+export type TAddDialogRef = {
   open: () => void;
   close: () => void;
   toggle: () => void;
@@ -26,7 +26,7 @@ export default forwardRef((props: IProps, ref) => {
   const [domainError, setDomainError] = useState(false);
   const { description } = chrome.runtime.getManifest();
 
-  useImperativeHandle(ref, () => ({
+  useImperativeHandle<unknown, TAddDialogRef>(ref, () => ({
     open() {
       setIsVisible(true);
     },
@@ -47,7 +47,6 @@ export default forwardRef((props: IProps, ref) => {
     }
 
     const { favicon, title } = await fetchDocument(domain);
-    console.log("=> fetchDocument", favicon, title);
 
     props.addRule({ url: domain, favicon, title });
     setIsVisible(false);
