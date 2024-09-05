@@ -5,8 +5,13 @@ import { Storage } from "@plasmohq/storage";
 
 import { getUrl, isHttpPage, openOptionsPageWithParams } from "~utils/url";
 
+import {
+  StorageKeys,
+  weekName,
+  type IRule,
+  type TStorage
+} from "../utils/constant";
 import { removeAlarms, setAlarms } from "./alarms";
-import { StorageKeys, weekName, type IRule, type TStorage } from "../utils/constant";
 
 const storage = new Storage();
 
@@ -62,7 +67,6 @@ export function getRule(): Promise<TStorage[StorageKeys.RULES]>;
 export async function getRule(id?: number) {
   const res =
     (await storage.get<TStorage[StorageKeys.RULES]>(StorageKeys.RULES)) || [];
-  console.log("=> getRule", res);
 
   if (id !== undefined) {
     const rule = res?.find((rule) => rule.id === id);

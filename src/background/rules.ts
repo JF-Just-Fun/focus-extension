@@ -61,8 +61,6 @@ export const removeNetRules = async (ids?: number[]) => {
 
 export const getNetRules = async () => {
   const rules = await chrome.declarativeNetRequest.getDynamicRules();
-  console.log("=> net-rules", rules);
-
   return rules;
 };
 

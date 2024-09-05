@@ -17,7 +17,7 @@ function urlChange() {
       url: currentUrl
     },
     (response) => {
-      if (response.matched) {
+      if (response?.matched) {
         chrome.runtime.sendMessage({
           action: ActionType.REDIRECT_BLOCKED_PAGE
         });

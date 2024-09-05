@@ -52,7 +52,7 @@ function OptionsIndex() {
         action: ActionType.STORAGE_RULES
       },
       (response) => {
-        if (response.storageRules) {
+        if (response?.storageRules) {
           setRules(response.storageRules);
         }
       }
@@ -66,11 +66,11 @@ function OptionsIndex() {
         id
       },
       (response) => {
-        if (response.rules) {
+        if (response?.rules) {
           setRules(response.rules);
           snackRef.current.open("Remove successful!", "success");
         } else {
-          snackRef.current.open(response.message, "error");
+          snackRef.current.open(response?.message, "error");
         }
       }
     );
@@ -83,11 +83,11 @@ function OptionsIndex() {
         rule: data
       },
       (response) => {
-        if (response.rule) {
+        if (response?.rule) {
           getRules();
           snackRef.current.open("Operation successful!", "success");
         } else {
-          snackRef.current.open(response.message, "error");
+          snackRef.current.open(response?.message, "error");
         }
       }
     );

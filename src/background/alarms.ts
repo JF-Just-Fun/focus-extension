@@ -15,11 +15,9 @@ export const alarmInit = async () => {
     if (!rule) return;
 
     if (type === "start") {
-      console.log("=> start-rule: ", id);
       addNetRules([{ id: rule.id, url: rule.url }]);
     } else if (type === "end") {
       removeNetRules([rule.id]);
-      console.log("=> end-rule: ", id);
     }
   });
 };

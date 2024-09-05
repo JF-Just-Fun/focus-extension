@@ -14,7 +14,7 @@ export async function fetchDocument(url: string) {
   try {
     const response = await fetch(url);
 
-    if (!response.ok) throw new Error("Network response was not ok");
+    if (!response?.ok) throw new Error("Network response was not ok");
     const text = await response.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, "text/html");

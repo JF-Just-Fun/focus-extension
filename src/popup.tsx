@@ -64,18 +64,9 @@ const RippleStep = styled.div`
 
 function IndexPopup() {
   const handleClick = async () => {
-    chrome.runtime.sendMessage(
-      {
-        action: ActionType.BLOCK_THIS_DOMAIN
-      },
-      (response) => {
-        // if (response.blocked) {
-        //   chrome.runtime.sendMessage({
-        //     action: ActionType.REDIRECT_BLOCKED_PAGE
-        //   });
-        // }
-      }
-    );
+    chrome.runtime.sendMessage({
+      action: ActionType.BLOCK_THIS_DOMAIN
+    });
   };
   return (
     <div
