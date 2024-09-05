@@ -4,6 +4,7 @@ import { Storage } from "@plasmohq/storage";
 
 import { getUrl, isHttpPage, openOptionsPageWithParams } from "~utils/url";
 
+import { removeAlarms, setAlarms } from "./alarms";
 import { StorageKeys, type IRule, type TStorage } from "./constant";
 
 const storage = new Storage();
@@ -85,9 +86,13 @@ export const setRule = async (data: Partial<IRule>) => {
 
   if (isEqual(newRule, rules[index])) throw Error("no change");
 
+  if (newRule.enabled) await setAlarms([newRule]);
+  else await removeAlarms([newRule]);
+
   rules.splice(!~index ? 0 : index, !~index ? 0 : 1, newRule);
 
   await storage.set(StorageKeys.RULES, rules);
+
   return newRule;
 };
 
@@ -95,17 +100,25 @@ export const removeRule = async (id: number) => {
   const rules = await getRule();
 
   const otherRules = rules?.filter((rule) => rule.id !== id);
+  const deletedRule = rules?.find((rule) => rule.id === id);
   try {
     await storage.set(StorageKeys.RULES, otherRules);
+    await removeAlarms([deletedRule]);
   } catch (error: unknown) {
-    if (error instanceof Error) throw error;
+    console.error(
+      "=> removeRule",
+      error instanceof Error ? error.message : error
+    );
   }
   return otherRules;
 };
 
 export const checkRuleUrlExist = async (url: string, rules?: IRule[]) => {
   if (!rules) rules = await getRule();
-  return !!~rules.findIndex((rule) => getUrl(rule.url) === getUrl(url));
+  return !!~rules.findIndex((rule) => {
+    const currentUrlRegExp = new RegExp(`${getUrl(url)}.*`);
+    return currentUrlRegExp.test(getUrl(rule.url));
+  });
 };
 
 export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
@@ -122,6 +135,9 @@ export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
       url: tab.url,
       title: tab.title,
       favicon: tab.favIconUrl
+    });
+    chrome.tabs.update(tab.id, {
+      url: chrome.runtime.getURL("tabs/blocked.html")
     });
   }
 };

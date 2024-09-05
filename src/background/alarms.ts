@@ -2,18 +2,25 @@ import dayjs from "dayjs";
 
 import type { IRule } from "./constant";
 import { weekName } from "./constant";
+import { addNetRules, removeNetRules } from "./rules";
 import { getRule } from "./store";
 
 export const alarmInit = async () => {
+  removeNetRules();
   const rules = await getRule();
   await setAlarms(rules);
 
   chrome.alarms.onAlarm.addListener(function (alarm) {
     const [type, id] = alarm.name.split("-rule-");
+    const rule = rules.find((r) => r.id === Number(id));
+    if (!rule) return;
+
     if (type === "start") {
-      console.log("=> end-rule: ", id);
-    } else if (type === "end") {
       console.log("=> start-rule: ", id);
+      addNetRules([{ id: rule.id, url: rule.url }]);
+    } else if (type === "end") {
+      removeNetRules([rule.id]);
+      console.log("=> end-rule: ", id);
     }
   });
 };
@@ -31,31 +38,35 @@ export const setAlarms = async (rules: IRule[]) => {
       .add(rule.start, "seconds")
       .valueOf();
     const endTime = dayjs().startOf("day").add(rule.end, "seconds").valueOf();
-    const hasStarted = startTime < currentTime;
     const hasEnded = endTime < currentTime;
 
     if (hasEnded) return;
     chrome.alarms.create(`end-rule-${rule.id}`, {
       when: endTime
     });
-
-    if (hasStarted) {
-      console.log("=> start-rule: hasStarted", rule);
-    } else {
-      chrome.alarms.create(`start-rule-${rule.id}`, {
-        when: startTime
-      });
-    }
+    chrome.alarms.create(`start-rule-${rule.id}`, {
+      when: startTime
+    });
   });
 };
 
 export const removeAlarms = async (rules: IRule[]) => {
-  await Promise.all(
-    rules.map((rule) => {
-      chrome.alarms.clear(`start-rule-${rule.id}`);
-      chrome.alarms.clear(`end-rule-${rule.id}`);
-    })
-  );
+  try {
+    await Promise.all(
+      rules.map((rule) => {
+        removeNetRules([rule.id]);
+        chrome.alarms.clear(`start-rule-${rule.id}`);
+        chrome.alarms.clear(`end-rule-${rule.id}`);
+      })
+    );
+    return true;
+  } catch (error) {
+    console.error(
+      "=> removeAlarms",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
 };
 
 export const getAlarms = async (ids: number[]) => {

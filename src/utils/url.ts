@@ -54,8 +54,6 @@ export const isHttpPage = (url: string) => {
 // 打开选项页面并传递参数
 export function openOptionsPageWithParams(params: Record<string, string>) {
   const urlParams = new URLSearchParams(params).toString();
-  console.log("=> urlParams", urlParams);
-
   chrome.runtime.openOptionsPage(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0].id) {

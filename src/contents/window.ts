@@ -13,7 +13,7 @@ function urlChange() {
   // 向背景脚本发送消息
   chrome.runtime.sendMessage(
     {
-      action: ActionType.URL_MATCH_RULE,
+      action: ActionType.URL_IN_EFFECT,
       url: currentUrl
     },
     (response) => {

@@ -1,19 +1,18 @@
-import { Storage } from "@plasmohq/storage";
+import { getDomain, getUrl } from "~utils/url";
 
-import { getDomain, getUrl, isHttpPage } from "~utils/url";
+interface INetRule {
+  id: number;
+  url: string;
+}
+export const addNetRules = async (netRules: Array<INetRule> | INetRule) => {
+  if (!Array.isArray(netRules)) netRules = [netRules];
 
-import { StorageKeys, type IRule, type TStorage } from "./constant";
-
-export const addRules = async (urls: string[]) => {
-  const storage = new Storage();
-
-  const id = await storage.get<TStorage[StorageKeys.ID]>(StorageKeys.ID);
-  const ruleAdd = urls.map((url, index) => {
-    const domain = getDomain(url);
+  const ruleAdd = netRules.map((netRule, index) => {
+    const domain = getDomain(netRule.url);
     if (!domain) throw Error("url is not valid");
-    const urlFilter = `||${getUrl(url)}*`;
+    const urlFilter = `||${getUrl(netRule.url)}*`;
     return {
-      id: id + index,
+      id: netRule.id,
       priority: 1,
       action: {
         type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
@@ -33,22 +32,20 @@ export const addRules = async (urls: string[]) => {
     } satisfies chrome.declarativeNetRequest.Rule;
   });
 
-  storage.set(StorageKeys.ID, id + ruleAdd.length);
-
   try {
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: ruleAdd
     });
     return true;
   } catch (error) {
-    console.error(chrome.runtime.lastError, error);
+    console.error(error);
     return false;
   }
 };
 
-export const removeRules = async (ids: number[]) => {
-  if (!ids.length) {
-    const allRules = await getRules();
+export const removeNetRules = async (ids?: number[]) => {
+  if (!ids?.length) {
+    const allRules = await getNetRules();
     ids = allRules.map((item) => item.id);
   }
   try {
@@ -62,36 +59,19 @@ export const removeRules = async (ids: number[]) => {
   return true;
 };
 
-export const getRules = async () => {
+export const getNetRules = async () => {
   const rules = await chrome.declarativeNetRequest.getDynamicRules();
+  console.log("=> net-rules", rules);
+
   return rules;
 };
 
-export const urlMatch = async (url: string) => {
-  const rules = await getRules();
+export const urlInEffect = async (url: string) => {
+  const rules = await getNetRules();
   return rules.some((rule) => {
     const regex = new RegExp(
       rule.condition.urlFilter.replace(/^\|\|/, "").replace(/\/\*$/, ".*")
     );
     return regex.test(url);
   });
-};
-
-export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
-  if (!tab) {
-    const currentTab = await chrome.tabs.query({
-      active: true,
-      currentWindow: true
-    });
-    tab = currentTab[0];
-  }
-  const httpPage = isHttpPage(tab.url);
-  if (httpPage) {
-    await addRules([tab.url]);
-    chrome.tabs.update(tab.id, {
-      url: chrome.runtime.getURL("tabs/blocked.html")
-    });
-    return true;
-  }
-  return false;
 };

@@ -69,7 +69,11 @@ function IndexPopup() {
         action: ActionType.BLOCK_THIS_DOMAIN
       },
       (response) => {
-        if (response.blocked) window.close();
+        // if (response.blocked) {
+        //   chrome.runtime.sendMessage({
+        //     action: ActionType.REDIRECT_BLOCKED_PAGE
+        //   });
+        // }
       }
     );
   };
