@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { assign, isEqual } from "lodash";
 
 import { Storage } from "@plasmohq/storage";
@@ -5,15 +6,9 @@ import { Storage } from "@plasmohq/storage";
 import { getUrl, isHttpPage, openOptionsPageWithParams } from "~utils/url";
 
 import { removeAlarms, setAlarms } from "./alarms";
-import { StorageKeys, type IRule, type TStorage } from "./constant";
+import { StorageKeys, weekName, type IRule, type TStorage } from "../utils/constant";
 
 const storage = new Storage();
-
-storage.watch({
-  [StorageKeys.RULES]: (c) => {
-    console.log("=> watch", StorageKeys.RULES, c);
-  }
-});
 
 const DayEnd = 24 * 60 * 60 - 1;
 
@@ -54,6 +49,11 @@ const getNewRule = async (
   if (newRule.start > newRule.end) {
     [newRule.start, newRule.end] = [newRule.end, newRule.start];
   }
+
+  if (!getUrl(newRule.url)) throw Error("url is invalid");
+  if (!~index && (await checkRuleUrlExist(newRule.url, originRules)))
+    throw Error("Url already exists!");
+
   return newRule;
 };
 
@@ -74,20 +74,17 @@ export async function getRule(id?: number) {
 export const setRule = async (data: Partial<IRule>) => {
   const rules = await getRule();
 
-  if (data.url) {
-    if (!getUrl(data.url)) throw Error("url is invalid");
-    if (await checkRuleUrlExist(data.url, rules))
-      throw Error("Url already exists!");
-  }
-
   const index = rules?.findIndex((rule) => rule.id === data.id);
 
   const newRule = await getNewRule(rules, index, data);
 
   if (isEqual(newRule, rules[index])) throw Error("no change");
 
-  if (newRule.enabled) await setAlarms([newRule]);
-  else await removeAlarms([newRule]);
+  const todayWeekName = weekName[dayjs().day()];
+
+  if (newRule.enabled && newRule.weekly[todayWeekName]) {
+    await setAlarms([newRule]);
+  } else await removeAlarms([newRule]);
 
   rules.splice(!~index ? 0 : index, !~index ? 0 : 1, newRule);
 

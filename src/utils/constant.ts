@@ -29,13 +29,13 @@ export enum StorageKeys {
 }
 
 export const weekName = [
+  "sun",
   "mon",
   "tue",
   "wed",
   "thu",
   "fri",
-  "sat",
-  "sun"
+  "sat"
 ] as const;
 
 export interface IRule {

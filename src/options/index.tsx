@@ -12,7 +12,7 @@ import {
   StorageKeys,
   type IRule,
   type TStorage
-} from "~/background/constant";
+} from "~utils/constant";
 import { clearParams, paramsToObject } from "~utils/url";
 
 import AddDialog, { type TAddDialogRef } from "./AddDialog";

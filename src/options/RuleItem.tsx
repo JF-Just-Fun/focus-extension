@@ -18,7 +18,7 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import { useState } from "react";
 
-import type { IRule } from "~background/constant";
+import { weekName, type IRule } from "~utils/constant";
 
 import {
   StyledBadge,
@@ -55,11 +55,23 @@ export default function (props: IProps) {
     end: getDayjsFromSeconds(props.end)
   });
 
+  const ruleInEffect = () => {
+    const now = dayjs();
+    const startTime = dayjs().startOf("day").add(props.start, "second");
+    const endTime = dayjs().startOf("day").add(props.end, "second");
+
+    return (
+      props.weekly[weekName[dayjs().day()]] &&
+      now.isBefore(endTime) &&
+      now.isAfter(startTime)
+    );
+  };
+
   return (
     <Card
       sx={{
         position: "relative",
-        minWidth: 400,
+        minWidth: 515,
         marginBottom: "30px",
         boxSizing: "border-box"
       }}>
@@ -67,7 +79,7 @@ export default function (props: IProps) {
         sx={{ display: "flex", alignItems: "center", justifyContent: "start" }}>
         <StyledBadge
           overlap="circular"
-          className={props.enabled ? "active" : "inactive"}
+          className={props.enabled && ruleInEffect() ? "active" : "inactive"}
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           sx={{ marginRight: "10px" }}
           variant="dot">

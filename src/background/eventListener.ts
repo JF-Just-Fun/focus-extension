@@ -1,6 +1,6 @@
 import { urlInEffect } from "~background/rules";
 
-import { ActionType, type IActionParams } from "./constant";
+import { ActionType, type IActionParams } from "../utils/constant";
 import {
   blockThisTab,
   checkRuleUrlExist,

@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 
-import type { IRule } from "./constant";
-import { weekName } from "./constant";
+import type { IRule } from "../utils/constant";
 import { addNetRules, removeNetRules } from "./rules";
 import { getRule } from "./store";
 
@@ -30,9 +29,6 @@ export const setAlarms = async (rules: IRule[]) => {
   const currentTime = Date.now();
 
   rules.forEach((rule) => {
-    const todayWeekName = weekName[dayjs().day()];
-    if (!rule.weekly[todayWeekName]) return;
-
     const startTime = dayjs()
       .startOf("day")
       .add(rule.start, "seconds")

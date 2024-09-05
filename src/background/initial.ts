@@ -1,6 +1,6 @@
 import { Storage } from "@plasmohq/storage";
 
-import { StorageKeys, type TStorage } from "./constant";
+import { StorageKeys, type TStorage } from "../utils/constant";
 
 export const MENU_ID = "focus-menu:block-this-domain";
 

@@ -7,7 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
-import type { IRule } from "~background/constant";
+import type { IRule } from "~utils/constant";
 import { fetchDocument } from "~options/document";
 import { isHttpPage } from "~utils/url";
 

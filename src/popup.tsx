@@ -2,7 +2,7 @@ import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
-import { ActionType } from "~background/constant";
+import { ActionType } from "~utils/constant";
 
 const color = "#0460cc";
 
