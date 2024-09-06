@@ -84,16 +84,14 @@ export const setRule = async (data: Partial<IRule>) => {
 
   if (isEqual(newRule, rules[index])) throw Error("no change");
 
-  const todayWeekName = weekName[dayjs().day()];
-
-  if (newRule.enabled && newRule.weekly[todayWeekName]) {
-    await setAlarms([newRule]);
-  } else await removeAlarms([newRule]);
-
   rules.splice(!~index ? 0 : index, !~index ? 0 : 1, newRule);
 
   await storage.set(StorageKeys.RULES, rules);
 
+  const todayWeekName = weekName[dayjs().day()];
+  if (newRule.enabled && newRule.weekly[todayWeekName]) {
+    await setAlarms([newRule]);
+  } else await removeAlarms([newRule]);
   return newRule;
 };
 

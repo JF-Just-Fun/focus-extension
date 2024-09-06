@@ -12,15 +12,15 @@ export const alarmInit = async () => {
 
   chrome.alarms.onAlarm.addListener(async function (alarm) {
     const [type, id] = alarm.name.split("-rule-");
-    const rule = rules.find((r) => r.id === Number(id));
+
+    const currentRules = await getRule();
+    const rule = currentRules.find((r) => r.id === Number(id));
     if (!rule) return;
 
     if (type === "start") {
-      const res = await addNetRules([{ id: rule.id, url: rule.url }]);
-      console.log("=> alarm start", res, rule);
+      addNetRules([{ id: rule.id, url: rule.url }]);
     } else if (type === "end") {
-      const res = removeNetRules([rule.id]);
-      console.log("=> alarm end", res, rule);
+      removeNetRules([rule.id]);
     }
   });
 };
@@ -29,7 +29,7 @@ export const setAlarms = async (rules: IRule[]) => {
   if (!rules.length) return;
   const currentTime = Date.now();
 
-  rules.forEach((rule) => {
+  rules.forEach(async (rule) => {
     const startTime = dayjs()
       .startOf("day")
       .add(rule.start, "seconds")
