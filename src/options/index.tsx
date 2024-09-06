@@ -2,17 +2,11 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
 import { useEffect, useRef, useState } from "react";
 
-import { Storage } from "@plasmohq/storage";
+import { sendToBackground } from "@plasmohq/messaging";
 
-import {
-  ActionType,
-  StorageKeys,
-  type IRule,
-  type TStorage
-} from "~utils/constant";
+import { StorageKeys, type IRule, type TStorage } from "~utils/constant";
 import { clearParams, paramsToObject } from "~utils/url";
 
 import AddDialog, { type TAddDialogRef } from "./AddDialog";
@@ -30,11 +24,9 @@ const styleCache = createCache({
 });
 
 function OptionsIndex() {
-  const [data, setData] = useState("");
   const [rules, setRules] = useState<TStorage[StorageKeys.RULES]>([]);
   const dialogRef = useRef<TAddDialogRef>(null);
   const snackRef = useRef<TSnackBarRef>(null);
-  const storage = new Storage();
   const { description } = chrome.runtime.getManifest();
   useEffect(() => {
     const params = paramsToObject(window.location.search);
@@ -46,51 +38,48 @@ function OptionsIndex() {
     getRules();
   }, []);
 
-  const getRules = () => {
-    chrome.runtime.sendMessage(
-      {
-        action: ActionType.STORAGE_RULES
-      },
-      (response) => {
-        if (response?.storageRules) {
-          setRules(response.storageRules);
-        }
-      }
-    );
+  const getRules = async () => {
+    const res = await sendToBackground({
+      name: "storage-rules",
+      extensionId: chrome.runtime.id
+    });
+    if (res.Ok && res.data?.storageRules) {
+      setRules(res.data?.storageRules);
+    }
   };
 
-  const handleDeleteRule = (id: number) => {
-    chrome.runtime.sendMessage(
-      {
-        action: ActionType.STORAGE_REMOVE_RULES,
+  const handleDeleteRule = async (id: number) => {
+    const res = await sendToBackground({
+      name: "storage-remove-rules",
+      body: {
         id
       },
-      (response) => {
-        if (response?.rules) {
-          setRules(response.rules);
-          snackRef.current.open("Remove successful!", "success");
-        } else {
-          snackRef.current.open(response?.message, "error");
-        }
-      }
-    );
+      extensionId: chrome.runtime.id
+    });
+
+    if (res.Ok) {
+      setRules(res.data.rules);
+      snackRef.current.open(res.message, "success");
+    } else {
+      snackRef.current.open(res.message, "error");
+    }
   };
 
-  const handleSetRule = (data: Partial<IRule>) => {
-    chrome.runtime.sendMessage(
-      {
-        action: ActionType.STORAGE_SET_RULES,
+  const handleSetRule = async (data: Partial<IRule>) => {
+    const res = await sendToBackground({
+      name: "storage-set-rules",
+      body: {
         rule: data
       },
-      (response) => {
-        if (response?.rule) {
-          getRules();
-          snackRef.current.open("Operation successful!", "success");
-        } else {
-          snackRef.current.open(response?.message, "error");
-        }
-      }
-    );
+      extensionId: chrome.runtime.id
+    });
+
+    if (res.Ok) {
+      getRules();
+      snackRef.current.open("Operation successful!", "success");
+    } else {
+      snackRef.current.open(res?.message, "error");
+    }
   };
 
   const handleAddRuleModal = () => {
@@ -106,7 +95,12 @@ function OptionsIndex() {
         <IconButton
           onClick={handleAddRuleModal}
           size="large"
-          style={{ position: "fixed", right: 20, bottom: 20, zIndex: 999 }}>
+          sx={{
+            position: "fixed",
+            right: 20,
+            bottom: 20,
+            zIndex: 999
+          }}>
           <AddCircleIcon color="primary" fontSize="large" />
         </IconButton>
 

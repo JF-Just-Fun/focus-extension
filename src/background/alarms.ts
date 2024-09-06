@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 
-import type { IRule } from "../utils/constant";
+import type { IRule } from "~utils/constant";
+
 import { addNetRules, removeNetRules } from "./rules";
 import { getRule } from "./store";
 
@@ -9,15 +10,17 @@ export const alarmInit = async () => {
   const rules = await getRule();
   await setAlarms(rules);
 
-  chrome.alarms.onAlarm.addListener(function (alarm) {
+  chrome.alarms.onAlarm.addListener(async function (alarm) {
     const [type, id] = alarm.name.split("-rule-");
     const rule = rules.find((r) => r.id === Number(id));
     if (!rule) return;
 
     if (type === "start") {
-      addNetRules([{ id: rule.id, url: rule.url }]);
+      const res = await addNetRules([{ id: rule.id, url: rule.url }]);
+      console.log("=> alarm start", res, rule);
     } else if (type === "end") {
-      removeNetRules([rule.id]);
+      const res = removeNetRules([rule.id]);
+      console.log("=> alarm end", res, rule);
     }
   });
 };

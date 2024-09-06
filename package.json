@@ -6,7 +6,7 @@
   "author": "yinpo",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build",
+    "build": "plasmo build --source-maps --bundle-buddy --no-minify",
     "package": "plasmo package"
   },
   "dependencies": {
@@ -16,11 +16,12 @@
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.16.7",
     "@mui/x-date-pickers": "^7.14.0",
+    "@plasmohq/messaging": "^0.6.2",
     "@plasmohq/storage": "^1.11.0",
     "@types/lodash": "^4.17.7",
     "dayjs": "^1.11.13",
     "lodash": "^4.17.21",
-    "plasmo": "0.88.0",
+    "plasmo": "0.89.1",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

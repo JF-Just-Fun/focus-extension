@@ -1,6 +1,7 @@
+import type { url } from "inspector";
 import type { PlasmoCSConfig } from "plasmo";
 
-import { ActionType } from "../utils/constant";
+import { sendToBackground } from "@plasmohq/messaging";
 
 export const config: PlasmoCSConfig = {
   matches: ["https://*/*", "http://*/*"],
@@ -8,22 +9,26 @@ export const config: PlasmoCSConfig = {
   run_at: "document_start"
 };
 
-function urlChange() {
+async function urlChange() {
   const currentUrl = window.location.href;
   // 向背景脚本发送消息
-  chrome.runtime.sendMessage(
-    {
-      action: ActionType.URL_IN_EFFECT,
+  const res = await sendToBackground({
+    name: "url-in-effect",
+    body: {
       url: currentUrl
     },
-    (response) => {
-      if (response?.matched) {
-        chrome.runtime.sendMessage({
-          action: ActionType.REDIRECT_BLOCKED_PAGE
-        });
-      }
-    }
-  );
+    extensionId: chrome.runtime.id
+  });
+
+  if (res.Ok) {
+    res.data.effect &&
+      sendToBackground({
+        name: "redirect-blocked-page",
+        extensionId: chrome.runtime.id
+      });
+  } else {
+    console.error("=> error: window url change", res.message);
+  }
 }
 
 let lastUrl = window.location.href;

@@ -3,14 +3,14 @@ import { assign, isEqual } from "lodash";
 
 import { Storage } from "@plasmohq/storage";
 
-import { getUrl, isHttpPage, openOptionsPageWithParams } from "~utils/url";
-
 import {
   StorageKeys,
   weekName,
   type IRule,
   type TStorage
-} from "../utils/constant";
+} from "~utils/constant";
+import { getUrl, isHttpPage, openOptionsPageWithParams } from "~utils/url";
+
 import { removeAlarms, setAlarms } from "./alarms";
 
 const storage = new Storage();

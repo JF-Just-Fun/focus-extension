@@ -7,7 +7,7 @@ const getFavicon = (doc: Document) => {
     doc.querySelector("link[rel='mask-icon']") ||
     doc.querySelector("meta[itemprop='image']");
 
-  return link.getAttribute("href") || "";
+  return link?.getAttribute("href") || "";
 };
 
 export async function fetchDocument(url: string) {
@@ -57,8 +57,6 @@ export function fetchPageDetails(url: string) {
         (results) => {
           if (results && results[0]) {
             const pageDetails = results[0].result;
-            console.log("Page Details:", pageDetails);
-
             // 可以在这里处理页面标题和favicon，例如存储或显示在options页面
             chrome.storage.local.set({ pageDetails });
 

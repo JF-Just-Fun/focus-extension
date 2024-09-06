@@ -53,7 +53,7 @@ export const removeNetRules = async (ids?: number[]) => {
       removeRuleIds: ids
     });
   } catch (error: unknown) {
-    console.log(error);
+    console.error("=> error", error instanceof Error ? error.message : error);
     return false;
   }
   return true;
@@ -66,6 +66,8 @@ export const getNetRules = async () => {
 
 export const urlInEffect = async (url: string) => {
   const rules = await getNetRules();
+  console.log("=> net rules", rules);
+
   return rules.some((rule) => {
     const regex = new RegExp(
       rule.condition.urlFilter.replace(/^\|\|/, "").replace(/\/\*$/, ".*")

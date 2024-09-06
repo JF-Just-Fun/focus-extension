@@ -6,6 +6,7 @@ export const MENU_ID = "focus-menu:block-this-domain";
 
 export default function () {
   const storage = new Storage();
+  console.log("=> bg sw initiated!");
 
   chrome.runtime.onInstalled.addListener(async () => {
     const id = await storage.get<TStorage[StorageKeys.ID]>(StorageKeys.ID);

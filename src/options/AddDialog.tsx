@@ -7,8 +7,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { forwardRef, useImperativeHandle, useState } from "react";
 
-import type { IRule } from "~utils/constant";
 import { fetchDocument } from "~options/document";
+import type { IRule } from "~utils/constant";
 import { isHttpPage } from "~utils/url";
 
 interface IProps {
@@ -57,6 +57,8 @@ export default forwardRef((props: IProps, ref) => {
     setDomainError(false);
     setIsVisible(false);
   };
+
+  if (!isVisible) return null;
 
   return (
     <Dialog open={isVisible} onClose={handleClose}>

@@ -1,15 +1,15 @@
+import "@plasmohq/messaging/background";
+
 import iconGray from "url:~assets/icon-gray.png";
 import icon from "url:~assets/icon-origin.png";
 
-import eventListener from "~background/eventListener";
-import initial from "~background/initial";
 import { isHttpPage } from "~utils/url";
 
 import { alarmInit } from "./alarms";
+import initial from "./initial";
 import { blockThisTab } from "./store";
 
 initial();
-eventListener();
 alarmInit();
 
 // 监听右键菜单点击事件

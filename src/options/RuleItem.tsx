@@ -155,8 +155,6 @@ export default function (props: IProps) {
               value={timeArr.end}
               onChange={(end) => setTimeArr((prev) => ({ ...prev, end }))}
               onAccept={(end) => {
-                console.log("=> onAccept", end.format());
-
                 handleChange({
                   end: getSecondsFromDayjs(end)
                 });
