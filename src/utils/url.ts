@@ -74,8 +74,8 @@ export const getUrlParams = (url: string) => {
 export const paramsToObject = (params: string) => {
   if (!params || !~params.indexOf("=")) return {};
   if (params.startsWith("?")) params = params.slice(1);
-  const u = new URL(`https://example.com?${params}`);
-  const paramsObj = Object.fromEntries(u.searchParams.entries());
+  const searchParams = new URLSearchParams(params);
+  const paramsObj = Object.fromEntries(searchParams.entries());
   return paramsObj;
 };
 
