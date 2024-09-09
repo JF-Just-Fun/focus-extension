@@ -1,0 +1,36 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - privacy
+
+jobs:
+  artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload build artifacts
+        uses: actions/upload-pages-artifact@v2
+        with:
+          name: privacy-artifacts
+          path: privacy/ # 指定构建输出的文件夹
+
+  deploy:
+    needs: artifact
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: privacy-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    steps:
+      - name: Deploy artifact
+        id: deployment
+        uses: actions/deploy-pages@v3
+        with:
+          artifact_name: privacy-artifacts
