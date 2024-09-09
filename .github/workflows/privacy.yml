@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: privacy-pages
-      url: ${{steps.deployment.outputs.page_url}}
+      url: ${{steps.deployment.outputs.page_url}}privacy.html
     steps:
       - name: Deploy artifact
         id: deployment
