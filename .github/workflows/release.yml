@@ -21,7 +21,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install dependencies
-        run: pnpm ci
+        run: pnpm install
 
       - name: Build the extension
         run: pnpm build
