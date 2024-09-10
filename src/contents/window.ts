@@ -27,7 +27,7 @@ async function urlChange() {
         extensionId: chrome.runtime.id
       });
   } else {
-    console.error("=> error: window url change", res.message);
+    console.log("=> error: window url change", res.message);
   }
 }
 

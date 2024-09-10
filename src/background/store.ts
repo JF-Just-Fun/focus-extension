@@ -104,8 +104,8 @@ export const removeRule = async (id: number) => {
     await storage.set(StorageKeys.RULES, otherRules);
     await removeAlarms([deletedRule]);
   } catch (error: unknown) {
-    console.error(
-      "=> removeRule",
+    console.log(
+      "=> error: removeRule",
       error instanceof Error ? error.message : error
     );
   }

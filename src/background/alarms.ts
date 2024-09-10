@@ -58,10 +58,6 @@ export const removeAlarms = async (rules: IRule[]) => {
     );
     return true;
   } catch (error) {
-    console.error(
-      "=> removeAlarms",
-      error instanceof Error ? error.message : error
-    );
     return false;
   }
 };

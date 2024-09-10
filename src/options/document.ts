@@ -26,7 +26,7 @@ export async function fetchDocument(url: string) {
       title: doc.title || ""
     };
   } catch (error) {
-    console.error("=> Failed to fetch favicon:", error);
+    console.log("=> error: failed to fetch favicon:", error);
     return {
       favicon: "",
       title: ""

@@ -14,7 +14,7 @@ export const getDomain = (url: string) => {
       return "";
     }
   } catch (error) {
-    console.error("=> domain error: ", url, error);
+    console.log("=> error: getDomain", url, error);
     return "";
   }
 };
@@ -36,7 +36,7 @@ export const getUrl = (url: string) => {
       return "";
     }
   } catch (error) {
-    console.error("=> url error: ", url, error);
+    console.log("=> error: getUrl", url, error);
     return "";
   }
 };

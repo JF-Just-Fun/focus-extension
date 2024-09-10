@@ -64,11 +64,10 @@ const RippleStep = styled.div`
 
 function IndexPopup() {
   const handleClick = async () => {
-    const res = await sendToBackground({
+    await sendToBackground({
       name: "block-this-tab",
       extensionId: chrome.runtime.id
     });
-    if (!res.Ok) console.error("=> error: block-this-tab", res.message);
   };
   return (
     <div

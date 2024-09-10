@@ -37,23 +37,25 @@ export const addNetRules = async (netRules: Array<INetRule> | INetRule) => {
       addRules: ruleAdd
     });
     return true;
-  } catch (error) {
-    console.error(error);
+  } catch (error: unknown) {
+    console.log("=> error", error instanceof Error ? error.message : error);
     return false;
   }
 };
 
 export const removeNetRules = async (ids?: number[]) => {
+  const allRules = await getNetRules();
+  const existRuleIds = allRules.map((item) => item.id);
   if (!ids?.length) {
-    const allRules = await getNetRules();
-    ids = allRules.map((item) => item.id);
+    ids = [...existRuleIds];
+  } else {
+    ids = ids.filter((id) => existRuleIds.includes(id));
   }
   try {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: ids
     });
   } catch (error: unknown) {
-    console.error("=> error", error instanceof Error ? error.message : error);
     return false;
   }
   return true;
