@@ -18,7 +18,8 @@ const handler: PlasmoMessaging.MessageHandler<{
     )[0].id;
 
   try {
-    await chrome.tabs.update(tabId, {
+    await chrome.tabs.remove(tabId);
+    await chrome.tabs.create({
       url: chrome.runtime.getURL("tabs/blocked.html")
     });
   } catch (error: unknown) {

@@ -1,7 +1,26 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging";
 
-import { blockThisTab } from "~background/store";
 import { Message } from "~utils/constant";
+import { isHttpPage, openOptionsPageWithParams } from "~utils/url";
+
+export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
+  if (!tab) {
+    const currentTab = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+    tab = currentTab[0];
+  }
+  const httpPage = isHttpPage(tab.url);
+  if (httpPage) {
+    await chrome.tabs.remove(tab.id);
+    openOptionsPageWithParams({
+      url: tab.url,
+      title: tab.title,
+      favicon: tab.favIconUrl
+    });
+  }
+};
 
 const handler: PlasmoMessaging.MessageHandler<{
   tab?: chrome.tabs.Tab;

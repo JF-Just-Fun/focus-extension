@@ -40,8 +40,7 @@ function OptionsIndex() {
 
   const getRules = async () => {
     const res = await sendToBackground({
-      name: "storage-rules",
-      extensionId: chrome.runtime.id
+      name: "storage-rules"
     });
     if (res.Ok && res.data?.storageRules) {
       setRules(res.data?.storageRules);
@@ -53,8 +52,7 @@ function OptionsIndex() {
       name: "storage-remove-rules",
       body: {
         id
-      },
-      extensionId: chrome.runtime.id
+      }
     });
 
     if (res.Ok) {
@@ -70,8 +68,7 @@ function OptionsIndex() {
       name: "storage-set-rules",
       body: {
         rule: data
-      },
-      extensionId: chrome.runtime.id
+      }
     });
 
     if (res.Ok) {

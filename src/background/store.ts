@@ -119,24 +119,3 @@ export const checkRuleUrlExist = async (url: string, rules?: IRule[]) => {
     return currentUrlRegExp.test(getUrl(rule.url));
   });
 };
-
-export const blockThisTab = async (tab?: chrome.tabs.Tab) => {
-  if (!tab) {
-    const currentTab = await chrome.tabs.query({
-      active: true,
-      currentWindow: true
-    });
-    tab = currentTab[0];
-  }
-  const httpPage = isHttpPage(tab.url);
-  if (httpPage) {
-    openOptionsPageWithParams({
-      url: tab.url,
-      title: tab.title,
-      favicon: tab.favIconUrl
-    });
-    chrome.tabs.update(tab.id, {
-      url: chrome.runtime.getURL("tabs/blocked.html")
-    });
-  }
-};

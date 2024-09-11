@@ -7,7 +7,7 @@ import { isHttpPage } from "~utils/url";
 
 import { alarmInit } from "./alarms";
 import initial from "./initial";
-import { blockThisTab } from "./store";
+import { blockThisTab } from "./messages/block-this-tab";
 
 initial();
 alarmInit();

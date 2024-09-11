@@ -16,15 +16,13 @@ async function urlChange() {
     name: "url-in-effect",
     body: {
       url: currentUrl
-    },
-    extensionId: chrome.runtime.id
+    }
   });
 
   if (res.Ok) {
     res.data.effect &&
       sendToBackground({
-        name: "redirect-blocked-page",
-        extensionId: chrome.runtime.id
+        name: "redirect-blocked-page"
       });
   } else {
     console.log("=> error: window url change", res.message);
